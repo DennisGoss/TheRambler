@@ -1,0 +1,11 @@
+[submodule "dennisgoss.github.io"]
+	path = dennisgoss.github.io
+	url = https://github.com/DennisGoss/dennisgoss.github.io.git
+	branch = master
+[submodule "themes/Notepadium"]
+	path = themes/Notepadium
+	url = https://github.com/cntrump/hugo-notepadium.git
+[submodule "public"]
+	path = public
+	url = https://github.com/DennisGoss/dennisgoss.github.io.git
+	branch = master
