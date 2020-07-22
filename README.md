@@ -1,0 +1,3 @@
+# TheRambler
+I am a SharePoint Infrastructure SME with vast experience in Farm deployment, troubleshooting, automation, maintenance and upgrade since 2003.  
+I claim not to be a developer but I am generally lazy and as a result have learned to develop in order to reduce the time needed for repetititve tasks. If you have to do it more than twice, it is probably worth scripting.  When it comes to design (making things look nice), I generally phone a friend or ignore the styling and emphasize function over fashion.  In this repo, I will host the artifacts, solutions, scripts, etc... that have been useful to me and others.
