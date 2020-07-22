@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Workflow on Dennis Goss the Rambler</title>
+    <link>/tags/workflow/</link>
+    <description>Recent content in Workflow on Dennis Goss the Rambler</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 21 Jul 2020 11:24:09 +0200</lastBuildDate>
+    
+        <atom:link href="/tags/workflow/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Find Workflow Associations and History Lists</title>
+      <link>/posts/my-first-post/</link>
+      <pubDate>Tue, 21 Jul 2020 11:24:09 +0200</pubDate>
+      
+      <guid>/posts/my-first-post/</guid>
+      <description>Find all 2010 and 2013 Workflows, their associated history lists and running instances As SharePoint 2010 Workflows are sunsetting in SharePoint Online SharePoint 2010 Workflow Retirement, it becomes even more important to inventory, rework and/or dispose of SharePoint 2010 workflows in your on premises SharePoint Farms. To that end, I have written a PowerShell script to find all workflows (2010 or 2013) and record the interesting details about the workflow in a CSV file.</description>
+      
+    </item>
+    
+  </channel>
+</rss>
