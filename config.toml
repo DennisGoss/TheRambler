@@ -1,0 +1,16 @@
+baseURL = "https://dennisgoss.github.io/"
+languageCode = "en-us"
+title = "Dennis Goss the Rambler"
+theme = "Notepadium"
+
+[markup.highlight]
+codeFences = true
+noClasses = false
+
+[params.nav]
+showCategories = true       # /categories/
+showTags = true             # /tags/
+
+[[params.nav.custom]]
+title = "About"
+url = "/about/"
