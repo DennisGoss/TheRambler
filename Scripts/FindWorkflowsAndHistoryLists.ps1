@@ -238,5 +238,4 @@ switch ($scope)
             Get-WorkflowInfo $allSites
             Write-Log -LogOutput ("End Logging for FindWorkflows and History Lists: "+$PSCommandPath) -WithTime
         }
-
 }
