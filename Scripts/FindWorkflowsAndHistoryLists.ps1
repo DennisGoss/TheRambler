@@ -58,7 +58,6 @@ Write-Log -LogOutput ($hdr) -WithTime
 Add-PSSnapin Microsoft.SharePoint.PowerShell -EA 0
 
 $exclude = @("widesite","team","Nintex","war") #terms to match against in site collection and web Urls for exclusion
-$wfmInstalled = "" #sets initial status of Workflow Manager for enumeration
 
 Function Get-WorkflowInfo 
 {
@@ -69,7 +68,7 @@ Function Get-WorkflowInfo
 
     foreach($siteUrl in $sites)
     {
-        if(!$null -ne ($exclude | ? { $siteUrl -match $_ }))
+        if(!$null -ne ($exclude | Where-Object { $siteUrl -match $_ }))
         {
             $site = Get-SPSite $siteUrl
             foreach($web in $site.AllWebs)
@@ -77,13 +76,13 @@ Function Get-WorkflowInfo
                 Write-Host "Checking"$web.Title"for workflows" -ForegroundColor Yellow
                 Write-Host ""
 
-                if(!$null -ne ($exclude | ? {$web.Url -match $_}))
+                if(!$null -ne ($exclude | Where-Object {$web.Url -match $_}))
                 {
                     Write-Host "Checking for 2010 Site Workflows"
                     if($web.WorkflowAssociations.Count -gt 0)
                     {
                         Write-Host "2010 Site Workflow(s) found!"
-                        foreach($wfa in $web.WorkflowAssociations | ? {$_.Name -notlike "*(*"})
+                        foreach($wfa in $web.WorkflowAssociations | Where-Object {$_.Name -notlike "*(*"})
                         {
                             $str = $web.Title+","+$web.Url+",SiteWorkflow,"+$wfa.Name+","+$wfa.Enabled+",2010,"+$wfa.RunningInstances+","+$wfa.IsDeclarative+","+$wfa.Modified+","+$web.SiteUsers.GetByID($wfa.Author).LoginName+","+$wfa.HistoryListTitle+","+($web.Site.WebApplication.Url).Trim('/')+$web.Lists[$wfa.HistoryListTitle].DefaultViewUrl+","+$web.Lists[$wfa.HistoryListTitle].ItemCount
                             Write-Host $str
@@ -97,13 +96,13 @@ Function Get-WorkflowInfo
                         $wfm = New-object Microsoft.SharePoint.WorkflowServices.WorkflowServicesManager($web)
                         $wfis = $wfm.GetWorkflowInstanceService()
                         $sub = $wfm.GetWorkflowSubscriptionService()
-                        $subs = $sub.EnumerateSubscriptions() | ? {$_.StatusColumnCreated -eq $False}
+                        $subs = $sub.EnumerateSubscriptions() | Where-Object {$_.StatusColumnCreated -eq $False}
                         if($subs.Count -gt 0)
                         {
                             foreach($s in $subs)
                             {
-                                $props = $s | Select -ExpandProperty PropertyDefinitions | Sort
-                                $runningInstances = ($wfis.Enumerate($s) | ? {$_.Status -ne "Completed"}).Count
+                                $props = $s | Select-Object -ExpandProperty PropertyDefinitions | Sort-Object
+                                $runningInstances = ($wfis.Enumerate($s) | Where-Object {$_.Status -ne "Completed"}).Count
                                 foreach($key in $props.Keys)
                                 {
                                     if($key -eq "SharePointWorkflowContext.Subscription.ModifiedDate")
@@ -136,7 +135,7 @@ Function Get-WorkflowInfo
                         if($list.WorkflowAssociations -ne 0)
                         {
                             Write-Host $list.Title
-                            foreach($wfa in $list.WorkflowAssociations | ? {$_.Name -notlike "*(*"})
+                            foreach($wfa in $list.WorkflowAssociations | Where-Object {$_.Name -notlike "*(*"})
                             {
                                 $str = $web.Title+","+$web.Url+","+$list.title+","+$wfa.Name+","+$wfa.Enabled+",2010,"+$wfa.RunningInstances+","+$wfa.IsDeclarative+","+$wfa.Modified+","+$web.SiteUsers.GetByID($wfa.Author).LoginName+","+$wfa.HistoryListTitle+","+($web.Site.WebApplication.Url).Trim('/')+$web.Lists[$wfa.HistoryListTitle].DefaultViewUrl+","+$web.Lists[$wfa.HistoryListTitle].ItemCount
                                 Write-Host $str
@@ -148,14 +147,13 @@ Function Get-WorkflowInfo
                         {
                             $wfm = New-object Microsoft.SharePoint.WorkflowServices.WorkflowServicesManager($web)
                             $sub = $wfm.GetWorkflowSubscriptionService()
-                            $wf = $sub.EnumerateSubscriptionsByList($list.ID)
                             $wfis = $wfm.GetWorkflowInstanceService()
                             #Start-Sleep -Seconds 3 #On occasion the Workflow Manager Enumeration call times out on first use - comment the sleep line if WFM is sure to be active
                             foreach($s in $sub.EnumerateSubscriptionsByList($list.ID))
                             {
                                 $strOut = ""
-                                $runningInstances = ($wfis.Enumerate($s) | ? {$_.Status -ne "Completed"}).Count
-                                $props = $s | Select -ExpandProperty PropertyDefinitions | Sort
+                                $runningInstances = ($wfis.Enumerate($s) | Where-Object {$_.Status -ne "Completed"}).Count
+                                $props = $s | Select-Object -ExpandProperty PropertyDefinitions | Sort-Object
                                 foreach($key in $props.Keys)
                                 {
                                     if($key -eq "SharePointWorkflowContext.Subscription.ModifiedDate")
@@ -194,7 +192,7 @@ switch ($scope)
     Farm
         {
             #Build Collection of all Site Collections in the Farm
-            $allSites = Get-SPWebApplication | select -ExpandProperty Sites | select -ExpandProperty Url
+            $allSites = Get-SPWebApplication | Select-Object -ExpandProperty Sites | Select-Object -ExpandProperty Url
             Write-Host "Checking for Workflows in the Farm -"$allSites.count"sites"
             #Call Function for Workflow Enumeration
             Get-WorkflowInfo $allSites
@@ -206,7 +204,7 @@ switch ($scope)
             #Build Collection of all Site Collections in the web app specified in $scopeURL
             Try
                 {
-                    $allSites = Get-SPWebApplication $scopeUrl -ErrorAction Stop | select -ExpandProperty Sites | select -ExpandProperty Url 
+                    $allSites = Get-SPWebApplication $scopeUrl -ErrorAction Stop | Select-Object -ExpandProperty Sites | Select-Object -ExpandProperty Url 
                 }
             Catch
                 {
@@ -225,7 +223,7 @@ switch ($scope)
             #Build Collection of all Site Collections in the Farm
             Try
                 {
-                    $allSites = Get-SPSite $scopeUrl -ErrorAction Stop | select -ExpandProperty Url 
+                    $allSites = Get-SPSite $scopeUrl -ErrorAction Stop | Select-Object -ExpandProperty Url 
                 }
             Catch
                 {
