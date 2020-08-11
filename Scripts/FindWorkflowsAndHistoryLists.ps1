@@ -28,8 +28,8 @@ if(!(Test-Path -Path $LogFolder))
     exit -1
 }
 $LogFile = $LogFolder + "\" + (Get-Date -UFormat "%Y%m%d") + "_FindWorkflows.log" #This can be overridden by the LogPath (named) parameter in the Write-Log function (FindWorkflows_$(Get-Date -Format yyyyMMdd_hhMMss).csv")
-$scope = "Farm" #Farm, WebApp or Site
-$scopeUrl = "https://webappurl/" #this variable is only used if scope is not Farm
+$scope = "WebApp" #Farm, WebApp or Site
+$scopeUrl = "https://webappURL/" #this variable is only used if scope is not Farm
  
 Function Write-Log
 {
@@ -58,7 +58,6 @@ Write-Log -LogOutput ($hdr) -WithTime
 Add-PSSnapin Microsoft.SharePoint.PowerShell -EA 0
 
 $exclude = @("widesite","team","Nintex","war") #terms to match against in site collection and web Urls for exclusion
-$wfmInstalled = "" #sets initial status of Workflow Manager for enumeration
 
 Function Get-WorkflowInfo 
 {
@@ -102,31 +101,19 @@ Function Get-WorkflowInfo
                         {
                             foreach($s in $subs)
                             {
-                                $props = $s | Select -ExpandProperty PropertyDefinitions | Sort
                                 $runningInstances = ($wfis.Enumerate($s) | ? {$_.Status -ne "Completed"}).Count
-                                foreach($key in $props.Keys)
-                                {
-                                    if($key -eq "SharePointWorkflowContext.Subscription.ModifiedDate")
-                                    {
-                                        $modified = $props[$key]
-                                    }
-                                    if($key -eq "vti_modifiedby")
-                                    {
-                                        $author = $props[$key]
-                                    }
-                                    if($key -eq "HistoryListId")
-                                    {
-                                        $histListID = $props[$key]
-                                        $histListTitle = $web.Lists.GetList($histListID,$false).Title
-                                        $histListUrl = $web.Lists.GetList($histListID,$false).DefaultViewUrl
-                                        $histListItemCount = $web.Lists.GetList($histListID,$false).ItemCount
-                                    }
-                                }
+                                $modified = ($s.PropertyDefinitions.'SharePointWorkflowContext.Subscription.ModifiedDate')
+                                $author = ($s.PropertyDefinitions.'ModifiedBy')
+                                $histListID = ($s.PropertyDefinitions.'HistoryListId')
+                                $histListTitle = $web.Lists.GetList($histListID,$false).Title
+                                $histListUrl = $web.Lists.GetList($histListID,$false).DefaultViewUrl
+                                $histListItemCount = $web.Lists.GetList($histListID,$false).ItemCount
+                                
+                            }
                                 $strOut = $web.Title+","+$web.Url+",SiteWorkflow,"+$s.Name+","+$s.Enabled+",2013,"+$runningInstances+",True,"+$modified+","+$author+","+$histListTitle+","+($web.Site.WebApplication.Url).Trim('/')+$histListUrl+","+$histListItemCount
                                 Write-Host $strOut
                                 Write-Host ""
                                 Write-Log -LogOutput ($strOut) -WithTime
-                            }
                         }
                     }
 
@@ -153,29 +140,14 @@ Function Get-WorkflowInfo
                             #Start-Sleep -Seconds 3 #On occasion the Workflow Manager Enumeration call times out on first use - comment the sleep line if WFM is sure to be active
                             foreach($s in $sub.EnumerateSubscriptionsByList($list.ID))
                             {
-                                $strOut = ""
                                 $runningInstances = ($wfis.Enumerate($s) | ? {$_.Status -ne "Completed"}).Count
-                                $props = $s | Select -ExpandProperty PropertyDefinitions | Sort
-                                foreach($key in $props.Keys)
-                                {
-                                    if($key -eq "SharePointWorkflowContext.Subscription.ModifiedDate")
-                                    {
-                                        $modified = $props[$key]
-                                    }
-        
-                                    if($key -eq "vti_modifiedby")
-                                    {
-                                        $author = $props[$key]
-                                    }
+                                $modified = ($s.PropertyDefinitions.'SharePointWorkflowContext.Subscription.ModifiedDate')
+                                $author = ($s.PropertyDefinitions.'ModifiedBy')
+                                $histListID = ($s.PropertyDefinitions.'HistoryListId')
+                                $histListTitle = $web.Lists.GetList($histListID,$false).Title
+                                $histListUrl = $web.Lists.GetList($histListID,$false).DefaultViewUrl
+                                $histListItemCount = $web.Lists.GetList($histListID,$false).ItemCount
 
-                                    if($key -eq "HistoryListId")
-                                    {
-                                        $histListID = $props[$key]
-                                        $histListTitle = $web.Lists.GetList($histListID,$false).Title
-                                        $histListUrl = $web.Lists.GetList($histListID,$false).DefaultViewUrl
-                                        $histListItemCount = $web.Lists.GetList($histListID,$false).ItemCount
-                                    }
-                                }
                                 $strOut = $web.Title+","+$web.Url+","+$list.Title+","+$s.Name+","+$s.Enabled+",2013,"+$runningInstances+",True,"+$modified+","+$author+","+$histListTitle+","+($web.Site.WebApplication.Url).Trim('/')+$histListUrl+","+$histListItemCount
                                 Write-Host $strOut
                                 Write-Host ""
